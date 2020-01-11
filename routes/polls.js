@@ -8,6 +8,8 @@ const router = express.Router();
 // delete  DELETE  /polls/:id
 // update  PUT     /polls/:id
 
+
+// Helper Fn to generate 6 random alphanumeric characters
 const generateRandomString = function() {
   let result = '';
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -51,6 +53,11 @@ module.exports = (db) => {
     // insert into database
 
     // redirect to poll/:id
+    res.redirect(`/${pollURL}`);
+  });
+
+  // Polls Submission
+  router.post("/:pollURL/submit", (req, res) => {
     res.redirect(`/${pollURL}`);
   });
 
