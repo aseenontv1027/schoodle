@@ -53,17 +53,17 @@ module.exports = (db) => {
     // insert into database
 
     // redirect to poll/:id
-    res.redirect(`/${pollURL}`);
+    res.redirect(`polls/${pollURL}`);
   });
 
   // Polls Submission
   router.post("/:pollURL/submit", (req, res) => {
-    res.redirect(`/${pollURL}`);
+    res.redirect(`polls/${pollURL}`);
   });
 
   // UPDATE Polls
   router.post("/:pollURL/update", (req, res) => {
-    res.redirect(`/${pollURL}`);
+    res.redirect(`polls/${pollURL}`);
   });
 
   // GET polls/randomURL (generated polls page)
