@@ -6,6 +6,6 @@ CREATE TABLE submissions (
   poll_id VARCHAR(255) NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
   submitter_name VARCHAR(255),
   submitter_email VARCHAR(255),
-  submission_time TIMESTAMP
+  submission_time TIME
 );
 
