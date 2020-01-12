@@ -50,6 +50,11 @@ app.use("/polls", pollsRoutes(db));
 //   res.render("index");
 // });
 
+//To redirect to the polls routes from home for the time being.**
+app.get('/', (req, res) => {
+  res.redirect('/polls');
+});
+
 app.listen(PORT, () => {
   console.log(`Schoodle app listening on port ${PORT}`);
 });
