@@ -54,13 +54,26 @@
         </div>
 
         <div class="form-group">
-          <label for="formGroupExampleInput2">Option 1</label>
-          <input name="options[0]" type="datetime-local" class="form-control" id="formGroupExampleInput2" placeholder="Add first option">
-          <button type="submit" class="btn btn-primary">+ Option</button>
-          <small id="emailHelp" class="form-text text-muted">Click to add another submission</small>
+          <label for="date-options-field">Please Select Your Date Options *</label>
+            <div class="input_fields_wrap">
+              <div><input type="datetime-local" name="option[0]" class="input_fields_wrap form-control" /></div>
+            </div>
+          <small id="emailHelp" class="form-text text-muted">Click + to add options, - to remove them.</small>
         </div>
 
-        <button type="submit" class="btn btn-primary">CREATE YOUR POLL</button>
+        <div>
+          <button type="button" class="add_field_button btn btn-primary">+</button>
+          <button type="button" class="remove_field_button btn btn-primary">-</button>
+        </div>
+
+        <!-- <div class="input_fields_wrap">
+          <label for="formGroupExampleInput2">Option 1</label>
+          <input name="options[0]" type="datetime-local" class="form-control" id="formGroupExampleInput2" placeholder="Add first option">
+          <button class="add_field_button btn btn-primary">+</button>
+          <div><input type="text" name="mytext[]"></div>
+        </div> -->
+
+        <div><button type="submit" class="btn btn-primary">CREATE YOUR POLL</button></div>
       </form>
     </div>
   </div>
