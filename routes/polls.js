@@ -4,6 +4,7 @@ const { Pool } = require("pg");
 const dbParams = require("../lib/db.js");
 const db = new Pool(dbParams);
 db.connect();
+
 // Resource: poll
 // get all GET     /polls
 // get     GET     /polls/:id
@@ -11,7 +12,8 @@ db.connect();
 // delete  DELETE  /polls/:id
 // update  PUT     /polls/:id
 
-// Helper Fn to generate 6 random alphanumeric characters
+// Helper Functions --------------------------------------------------------------------
+// Generate 6 random alphanumeric characters
 const generateRandomString = function() {
   let result = "";
   let characters =
@@ -22,6 +24,8 @@ const generateRandomString = function() {
   }
   return result;
 };
+
+// Add polls by inserting a new poll into database
 const addPoll = data => {
   let pollURL = String(generateRandomString());
   const dataValues = [
@@ -39,8 +43,43 @@ const addPoll = data => {
   RETURNING * ;`;
 
   return db.query(dataQuery, dataValues)
-   .then(res => { return res.rows[0]});
+   .then(res => {
+    console.log('This is res.rows!!!!' + res.rows);
+    return res.rows[0]});
 };
+
+// p5RFDa
+//
+
+
+
+
+const showDatabaseTableByRow = function(counter, url) {
+  const dataQuery = `SELECT submissions.submitter_name as submitter, poll_options.date_option as date, poll_options.time_option as time, submission_responses.submission_response as true_false
+  FROM polls
+  JOIN poll_options ON polls.id = poll_id
+  JOIN submission_responses ON poll_option_id = poll_options.id
+  JOIN submissions ON submission_id = submissions.id
+  WHERE polls.id = $1;`;
+
+  const dataValues = [url];
+  const pollSummiters = [];
+  console.log('This is dataValues bro: ', dataValues);
+  return db.query(dataQuery, dataValues)
+  .then(res => {
+    console.log('This is just res', res);
+
+    res.rows.forEach(submitter => {
+      console.log(`NAME: ${submitter.submitter}, DATE: ${submitter.date}, TIME: ${submitter.time}, CHECKED: ${submitter.true_false}`);
+    });
+    return res.rows;
+  });
+
+};
+
+
+
+
 const getDate = (dateTime) => {
   dateTimeArray = dateTime.split('T');
   return dateTimeArray[0];
@@ -49,6 +88,7 @@ const getTime = (dateTime) => {
   dateTimeArray = dateTime.split('T');
   return dateTimeArray[1];
 }
+
 module.exports = db => {
   // CREATE New Poll
   router.post("/", (req, res) => {
@@ -93,18 +133,41 @@ module.exports = db => {
   });
 
   // Polls Submission
-  router.post("/:pollURL/submit", (req, res) => {
+  router.post("/submit", (req, res) => {
     res.redirect(`polls/${pollURL}`); //polls.id
   });
 
   // UPDATE Polls
-  router.post("/:pollURL/update", (req, res) => {
+  router.post("/update", (req, res) => {
     res.redirect(`polls/${pollURL}`); //polls.id
   });
 
   // GET polls/randomURL (generated polls page)
   router.get("/:pollURL", (req, res) => {
-    res.render("show");
+
+    const counter = 0;
+
+    console.log(`This is req.params.pollURL ${req.params.pollURL}`);
+
+    showDatabaseTableByRow(counter, req.params.pollURL)
+    .then(rowsArr => {
+      console.log('This is rowsArr!!!!!!!!!!!!!!' + rowsArr);
+
+      const templateVar = {};
+
+
+
+
+      res.render("show");
+    })
+    .catch(e => {
+      console.error(e);
+      res.send(e);
+    });
+
+
+
+
   });
 
   // GET Polls (home route)
