@@ -41,7 +41,14 @@ const addPoll = data => {
   return db.query(dataQuery, dataValues)
    .then(res => { return res.rows[0]});
 };
-
+const getDate = (dateTime) => {
+  dateTimeArray = dateTime.split('T');
+  return dateTimeArray[0];
+}
+const getTime = (dateTime) => {
+  dateTimeArray = dateTime.split('T');
+  return dateTimeArray[1];
+}
 module.exports = db => {
   // CREATE New Poll
   router.post("/", (req, res) => {
