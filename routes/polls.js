@@ -111,10 +111,17 @@ module.exports = db => {
      res.redirect(`/${pollURL}`); //polls.id
   });
 
+  //NOT SURE IF WE NEED THIS ROUTE YET
+  // // UPDATE Polls
+  // router.post("/update", (req, res) => {
+  //   res.redirect(`polls/${pollURL}`); //polls.id
+  // });
+
   // UPDATE Polls
   router.post("/update", (req, res) => {
     res.redirect(`/${pollURL}`); //polls.id
   });
+
 
 
 
