@@ -1,15 +1,4 @@
-// $(() => {
-//   $.ajax({
-//     method: "GET",
-//     url: "/api/users"
-//   }).done((users) => {
-//     for(user of users) {
-//       $("<div>").text(user.name).appendTo($("body"));
-//     }
-//   });;
-// });
-
-// Add form inputs (taken from: https://www.sanwebe.com/2013/03/addremove-input-fields-dynamically-with-jquery)
+// Add form inputs to main form
 $(document).ready(function() {
   const max_fields      = 10;
   const wrapper         = $(".input_fields_wrap");
