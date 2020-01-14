@@ -47,6 +47,7 @@ const addPoll = data => {
     console.log('This is res.rows!!!!' + res.rows);
     return res.rows[0]});
 };
+
 // p5RFDa
 //
 
@@ -77,6 +78,16 @@ const showDatabaseTableByRow = function(counter, url) {
 };
 
 
+
+
+const getDate = (dateTime) => {
+  dateTimeArray = dateTime.split('T');
+  return dateTimeArray[0];
+}
+const getTime = (dateTime) => {
+  dateTimeArray = dateTime.split('T');
+  return dateTimeArray[1];
+}
 
 module.exports = db => {
   // CREATE New Poll
