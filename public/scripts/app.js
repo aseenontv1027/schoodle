@@ -33,4 +33,16 @@ $(document).ready(function() {
           wrapper[0].children[total_fields - 1].remove();
       }
   });
+
+  $('#editable').Tabledit({
+    url: 'example.php',
+    editButton: false,
+    deleteButton: false,
+    hideIdentifier: true,
+    columns: {
+      identifier: [0, 'id'],
+      editable: [[2, 'name'], [3, 'option1'], [3, 'option2'], [4, 'option3']]
+      }
+    });
+
 });
