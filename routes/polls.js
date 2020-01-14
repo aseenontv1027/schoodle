@@ -117,6 +117,7 @@ module.exports = db => {
   });
 
 
+
   // GET Polls (home route)
   router.get("/new", (req, res) => {
     res.render("index");
