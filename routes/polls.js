@@ -149,7 +149,7 @@ module.exports = db => {
 
     console.log(`This is req.params.pollURL ${req.params.pollURL}`);
 
-    showDatabaseTableByRow(counter, req.params.pollURL)
+    showDatabaseTableByRow(counter, '1')
     .then(rowsArr => {
       console.log('This is rowsArr!!!!!!!!!!!!!!' + rowsArr);
 
