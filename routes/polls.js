@@ -13,30 +13,23 @@ db.connect();
 // update  PUT     /polls/:id
 
 // Helper Functions --------------------------------------------------------------------
-// Generate 6 random alphanumeric characters
-const generateRandomString = function() {
-  let result = "";
-  let characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let length = characters.length;
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * length));
-  }
-  return result;
+
+//Pass the number of characters you'd like to produce as a random string
+const generateRandomString = (length) => {
+  return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
 };
 
-// Add polls by inserting a new poll into database
+// Add polls by inserting a new poll into database -- CURRENTLY does not post options to poll_options table
 const addPoll = data => {
-  let pollURL = String(generateRandomString());
+  let pollURL = generateRandomString(16);
   const dataValues = [
-    // data.id,
     pollURL,
     data.title,
     data.description,
     data.creator_name,
     data.creator_email
   ];
-  console.log(dataValues, '<--- data values')
+
   const dataQuery = `INSERT INTO polls
   (id, title, description, creator_name, creator_email)
   VALUES ($1,$2,$3,$4,$5)
@@ -73,6 +66,7 @@ const checkIfPollIdExists = (id) => {
 
   return db.query(idQuery, [id])
   .then(res => {
+
     console.log(res.rows,'<--- data values');
     return res.rows.length === 1});
 };
@@ -80,6 +74,7 @@ const checkIfPollIdExists = (id) => {
 const getDate = (dateTime) => {
   dateTimeArray = dateTime.split('T');
   return dateTimeArray[0];
+
 };
 
 const getTime = (dateTime) => {
@@ -91,25 +86,25 @@ const getTime = (dateTime) => {
 
 // Routes -----------------------------------------------------------------------
 module.exports = db => {
-  // CREATE New Poll
+
+  // Create New Poll
   router.post("/", (req, res) => {
     // Get poll data from form
     addPoll({ ...req.body })
       .then(poll => {
-        res.redirect(`/${poll.id}`)})
+        res.redirect(`/polls/${poll.id}`)})
       .catch(e => {
         console.error(e);
         res.send(e);
       });
 
-
   });
 
-  // Polls Submission
+  // Submit response to poll
   router.post("/submit", (req, res) => {
-///check
      res.redirect(`/${pollURL}`); //polls.id
   });
+
 
   //NOT SURE IF WE NEED THIS ROUTE YET
   // // UPDATE Polls
@@ -123,8 +118,6 @@ module.exports = db => {
   });
 
 
-
-
   // GET Polls (home route)
   router.get("/new", (req, res) => {
     res.render("index");
@@ -136,7 +129,6 @@ module.exports = db => {
 
   // GET polls/randomURL (generated polls page)
   router.get("/:pollURL", (req, res) => {
-
     checkIfPollIdExists(req.params.pollURL)
     .then((exists) => {
       if (exists) {
@@ -159,6 +151,8 @@ module.exports = db => {
       res.send(e);
     });
   });
+
   return router;
+
 };
 
