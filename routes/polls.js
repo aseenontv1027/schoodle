@@ -48,25 +48,19 @@ const addPoll = data => {
     return res.rows[0]});
 };
 
-
-const showDatabaseTableByRow = function(counter, url) {
-  const dataQuery = `SELECT submissions.submitter_name as submitter, poll_options.date_option as date, poll_options.time_option as time, submission_responses.submission_response as true_false
+// Returns the whole table data in an array
+const getTableDataByRow = function(url) {
+  const dataQuery =
+  `SELECT submissions.submitter_name as name, poll_options.date_option as date, poll_options.time_option as time, submission_responses.submission_response as true_false
   FROM polls
   JOIN poll_options ON polls.id = poll_id
   JOIN submission_responses ON poll_option_id = poll_options.id
   JOIN submissions ON submission_id = submissions.id
   WHERE polls.id = $1;`;
 
-  const dataValues = [url];
-  const pollSummiters = [];
-  console.log('This is dataValues bro: ', dataValues);
-  return db.query(dataQuery, dataValues)
+  return db.query(dataQuery, [url])
   .then(res => {
-    console.log('This is just res', res);
-
-    res.rows.forEach(submitter => {
-      console.log(`NAME: ${submitter.submitter}, DATE: ${submitter.date}, TIME: ${submitter.time}, CHECKED: ${submitter.true_false}`);
-    });
+    console.log(res.rows, '<--- tableData values');
     return res.rows;
   });
 };
@@ -75,21 +69,27 @@ const checkIfPollIdExists = (id) => {
   const idQuery =
   ` SELECT id
     FROM polls
-    WHERE id =  $1 `;
+    WHERE id =  $1;`;
+
   return db.query(idQuery, [id])
   .then(res => {
-    console.log(res.rows,'<--- data values')
-    return res.rows.length === 1})
-}
+    console.log(res.rows,'<--- data values');
+    return res.rows.length === 1});
+};
+
 const getDate = (dateTime) => {
   dateTimeArray = dateTime.split('T');
   return dateTimeArray[0];
-}
+};
+
 const getTime = (dateTime) => {
   dateTimeArray = dateTime.split('T');
   return dateTimeArray[1];
-}
+};
 
+
+
+// Routes -----------------------------------------------------------------------
 module.exports = db => {
   // CREATE New Poll
   router.post("/", (req, res) => {
@@ -133,12 +133,13 @@ module.exports = db => {
     checkIfPollIdExists(req.params.pollURL)
     .then((exists) => {
       if (exists) {
-        const counter = 0;
-        console.log(`This is req.params.pollURL ${req.params.pollURL}`);
-        return showDatabaseTableByRow(counter, req.params.pollURL).then(
-          rowsArr => {
-          console.log('This is rowsArr!!!!!!!!!!!!!!' + rowsArr);
-          const templateVar = {};
+
+        getTableDataByRow(req.params.pollURL)
+        .then(tableData => {
+          console.log(tableData, '<--- tableData again');
+
+
+
           res.render("show");
           });
       } else {
