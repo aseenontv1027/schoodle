@@ -13,30 +13,23 @@ db.connect();
 // update  PUT     /polls/:id
 
 // Helper Functions --------------------------------------------------------------------
-// Generate 6 random alphanumeric characters
-const generateRandomString = function() {
-  let result = "";
-  let characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let length = characters.length;
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * length));
-  }
-  return result;
+
+//Pass the number of characters you'd like to produce as a random string
+const generateRandomString = (length) => {
+  return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
 };
 
-// Add polls by inserting a new poll into database
+// Add polls by inserting a new poll into database -- CURRENTLY does not post options to poll_options table
 const addPoll = data => {
-  let pollURL = String(generateRandomString());
+  let pollURL = generateRandomString(16);
   const dataValues = [
-    // data.id,
     pollURL,
     data.title,
     data.description,
     data.creator_name,
     data.creator_email
   ];
-  console.log(dataValues, '<--- data values')
+
   const dataQuery = `INSERT INTO polls
   (id, title, description, creator_name, creator_email)
   VALUES ($1,$2,$3,$4,$5)
@@ -47,7 +40,6 @@ const addPoll = data => {
     console.log('This is res.rows!!!!' + res.rows);
     return res.rows[0]});
 };
-
 
 const showDatabaseTableByRow = function(counter, url) {
   const dataQuery = `SELECT submissions.submitter_name as submitter, poll_options.date_option as date, poll_options.time_option as time, submission_responses.submission_response as true_false
@@ -81,42 +73,41 @@ const checkIfPollIdExists = (id) => {
     console.log(res.rows,'<--- data values')
     return res.rows.length === 1})
 }
+
 const getDate = (dateTime) => {
   dateTimeArray = dateTime.split('T');
   return dateTimeArray[0];
 }
+
 const getTime = (dateTime) => {
   dateTimeArray = dateTime.split('T');
   return dateTimeArray[1];
 }
 
 module.exports = db => {
-  // CREATE New Poll
+
+  // Create New Poll
   router.post("/", (req, res) => {
     // Get poll data from form
     addPoll({ ...req.body })
       .then(poll => {
-        res.redirect(`/${poll.id}`)})
+        res.redirect(`/polls/${poll.id}`)})
       .catch(e => {
         console.error(e);
         res.send(e);
       });
 
-
   });
 
-  // Polls Submission
+  // Submit response to poll
   router.post("/submit", (req, res) => {
-///check
      res.redirect(`/${pollURL}`); //polls.id
   });
 
-  // UPDATE Polls
+  // Update response to poll
   router.post("/update", (req, res) => {
     res.redirect(`/${pollURL}`); //polls.id
   });
-
-
 
   // GET Polls (home route)
   router.get("/new", (req, res) => {
@@ -129,7 +120,6 @@ module.exports = db => {
 
   // GET polls/randomURL (generated polls page)
   router.get("/:pollURL", (req, res) => {
-
     checkIfPollIdExists(req.params.pollURL)
     .then((exists) => {
       if (exists) {
@@ -151,6 +141,8 @@ module.exports = db => {
       res.send(e);
     });
   });
+
   return router;
+
 };
 
