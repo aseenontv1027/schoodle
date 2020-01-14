@@ -6,9 +6,9 @@ const db = new Pool(dbParams);
 db.connect();
 
 // Resource: poll
-// get all GET     /polls
+// get all GET     /polls/new
 // get     GET     /polls/:id
-// create  POST    /polls
+// create  POST    /polls/new
 // delete  DELETE  /polls/:id
 // update  PUT     /polls/:id
 
@@ -48,11 +48,6 @@ const addPoll = data => {
     return res.rows[0]});
 };
 
-// p5RFDa
-//
-
-
-
 
 const showDatabaseTableByRow = function(counter, url) {
   const dataQuery = `SELECT submissions.submitter_name as submitter, poll_options.date_option as date, poll_options.time_option as time, submission_responses.submission_response as true_false
@@ -74,12 +69,18 @@ const showDatabaseTableByRow = function(counter, url) {
     });
     return res.rows;
   });
-
 };
 
-
-
-
+const checkIfPollIdExists = (id) => {
+  const idQuery =
+  ` SELECT id
+    FROM polls
+    WHERE id =  $1 `;
+  return db.query(idQuery, [id])
+  .then(res => {
+    console.log(res.rows,'<--- data values')
+    return res.rows.length === 1})
+}
 const getDate = (dateTime) => {
   dateTimeArray = dateTime.split('T');
   return dateTimeArray[0];
@@ -93,48 +94,21 @@ module.exports = db => {
   // CREATE New Poll
   router.post("/", (req, res) => {
     // Get poll data from form
-    //let pollURL = String(generateRandomString());
-
     addPoll({ ...req.body })
       .then(poll => {
-
-        res.redirect(`polls/${poll.id}`)})
+        res.redirect(`/${poll.id}`)})
       .catch(e => {
         console.error(e);
         res.send(e);
       });
 
-    //['7d0dgksah30', 'My Poll 1', 'This is test poll 1', 'D B', 'db@db.com']
 
-    // const poll = {
-    //   id: 'theNewPoll', // random generated string
-    //   title: req.body.title,
-    //   description: '',
-    //   creator_name: '',
-    //   creator_email: '',
-    // }
-
-    // res.json(req.body);
-
-    // req.body
-    // {
-    //   title: '',
-    //   description: '',
-    //   creator_name: '',
-    //   creator_email: '',
-    //   options: ['asdasd'],
-    // }
-
-    // validate data
-
-    // insert into database
-
-    // redirect to poll/:id
   });
 
   // Polls Submission
   router.post("/submit", (req, res) => {
-    res.redirect(`polls/${pollURL}`); //polls.id
+///check
+     res.redirect(`/${pollURL}`); //polls.id
   });
 
   //NOT SURE IF WE NEED THIS ROUTE YET
@@ -143,70 +117,47 @@ module.exports = db => {
   //   res.redirect(`polls/${pollURL}`); //polls.id
   // });
 
+  // UPDATE Polls
+  router.post("/update", (req, res) => {
+    res.redirect(`/${pollURL}`); //polls.id
+  });
+
+
+
+
+  // GET Polls (home route)
+  router.get("/new", (req, res) => {
+    res.render("index");
+  });
+   // GET Polls (home route)
+   router.get("/", (req, res) => {
+    res.redirect('/new')
+  });
+
   // GET polls/randomURL (generated polls page)
   router.get("/:pollURL", (req, res) => {
 
-    const counter = 0;
-
-    console.log(`This is req.params.pollURL ${req.params.pollURL}`);
-
-    showDatabaseTableByRow(counter, req.params.pollURL)
-    .then(rowsArr => {
-      console.log('This is rowsArr!!!!!!!!!!!!!!' + rowsArr);
-
-      const templateVar = {};
-
-
-
-
-      res.render("show");
+    checkIfPollIdExists(req.params.pollURL)
+    .then((exists) => {
+      if (exists) {
+        const counter = 0;
+        console.log(`This is req.params.pollURL ${req.params.pollURL}`);
+        return showDatabaseTableByRow(counter, req.params.pollURL).then(
+          rowsArr => {
+          console.log('This is rowsArr!!!!!!!!!!!!!!' + rowsArr);
+          const templateVar = {};
+          res.render("show");
+          });
+      } else {
+        res.redirect('/polls/new');
+        return null;
+      }
     })
     .catch(e => {
       console.error(e);
       res.send(e);
     });
-
-
-
-
   });
-
-  // GET Polls (home route)
-  router.get("/", (req, res) => {
-    res.render("index");
-  });
-
   return router;
 };
 
-// ---------------------------------------------------------------
-
-// module.exports = (db) => {
-//   router.get("/", (req, res) => {
-//     db.query(`SELECT * FROM users;`)
-//       .then(data => {
-//         const polls = data.rows;
-//         res.render('polls', { polls });
-//       })
-//       .catch(err => {
-//         res
-//           .status(500)
-//           .json({ error: err.message });
-//       });
-//   });
-//   return router;
-// };
-
-// --------------------------------------------------------------
-// router.get("/polls", (req, res) => {
-//   db.query(`SELECT * FROM polls;`)
-//     .then(data => {
-//       const polls = data;
-//       res.json({ polls });
-//     })
-//     .catch(err => {
-//       res
-//         .status(500)
-//         .json({ error: err.message });
-//     });
-// });

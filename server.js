@@ -52,7 +52,7 @@ app.use("/polls", pollsRoutes(db));
 
 //To redirect to the polls routes from home for the time being.**
 app.get('/', (req, res) => {
-  res.redirect('/polls');
+  res.redirect('/polls/new');
 });
 
 app.listen(PORT, () => {

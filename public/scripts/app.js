@@ -1,24 +1,30 @@
 // Add form inputs to main form
 $(document).ready(function() {
-  const max_fields      = 10;
+
   const wrapper         = $(".input_fields_wrap");
   const add_button      = $(".add_field_button");
   const remove_button   = $(".remove_field_button");
+
+  const max_fields      = 10;
   let optionNum = 0;
 
-  const html = num => `<div><input type="datetime-local" name="option[${num}]" class="form-control" /></div>`
+  // input to add
+  const html = num => `<div><input type="datetime-local" name="option[${num}]" class="form-control" /></div>`;
 
+  // add on click
   $(add_button).click(function(e){
-      e.preventDefault();
+      //e.preventDefault(); No need of this line since <button> is type="button"; By default <button> submits
       optionNum++;
+
       let total_fields = wrapper[0].children.length;
       if(total_fields < max_fields) {
-          $(wrapper).append(html(optionNum));
+          wrapper.append(html(optionNum));
       }
   });
 
+  // remove on click
   $(remove_button).click(function(e){
-      e.preventDefault();
+      // e.preventDefault();
       if (optionNum > 1) {
         optionNum--;
       }
@@ -40,5 +46,3 @@ $(document).ready(function() {
     });
 
 });
-
-
