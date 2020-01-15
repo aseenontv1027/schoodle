@@ -27,18 +27,46 @@ const addPoll = data => {
     data.title,
     data.description,
     data.creator_name,
-    data.creator_email
+    data.creator_email,
   ];
 
-  const dataQuery = `INSERT INTO polls
+  const lengthOfTime = data.option.length;
+
+  let dataQuery = `INSERT INTO polls
   (id, title, description, creator_name, creator_email)
   VALUES ($1,$2,$3,$4,$5)
   RETURNING * ;`;
 
+  console.log(dataQuery);
+
   return db.query(dataQuery, dataValues)
-   .then(res => {
-    console.log('This is res.rows!!!!' + res.rows);
-    return res.rows[0]});
+    .then(res => {
+      let timeQuery = '';
+      let timeQueryStart = `INSERT INTO poll_options (poll_id, date_option, time_option)
+      VALUES `;
+
+      const timeQueryLoop = (counter) => {
+        let queryLoop =
+        `
+        ('${res.rows[0].id}', '${getDate(data.option[counter])}', '${getTime(data.option[counter])}')
+        `
+        return queryLoop;
+      };
+
+      timeQuery = timeQuery + timeQueryStart;
+      for (let i = 0; i < lengthOfTime; i++) {
+        if (i === lengthOfTime - 1) {
+          timeQuery = timeQuery + timeQueryLoop(i);
+        } else {
+          timeQuery = timeQuery + timeQueryLoop(i) + ', ';
+        }
+      };
+
+      timeQuery = timeQuery + 'RETURNING poll_id;';
+
+      return db.query(timeQuery).then(res => {
+        console.log('TTTTThis is ', res);
+        return res.rows})});
 };
 
 // Returns the whole table data in an array
@@ -92,7 +120,9 @@ module.exports = db => {
     // Get poll data from form
     addPoll({ ...req.body })
       .then(poll => {
-        res.redirect(`/polls/${poll.id}`)})
+        console.log('Heyyyyyyyyyy', poll);
+
+        res.redirect(`/polls/${poll[0].poll_id}`)})
       .catch(e => {
         console.error(e);
         res.send(e);
@@ -155,4 +185,3 @@ module.exports = db => {
   return router;
 
 };
-
