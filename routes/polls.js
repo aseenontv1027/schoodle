@@ -132,7 +132,6 @@ module.exports = db => {
 
   // Submit response to poll
   router.post("/submit", (req, res) => {
-    //insert to database
      res.redirect(`/${pollURL}`); //polls.id
   });
 
@@ -167,6 +166,8 @@ module.exports = db => {
         getTableDataByRow(req.params.pollURL)
         .then(tableData => {
           console.log(tableData, '<--- tableData again');
+
+
 
           res.render("show");
           });
