@@ -133,12 +133,8 @@ module.exports = db => {
 
   // Submit response to poll
   router.post("/submit", (req, res) => {
-<<<<<<< HEAD
-     res.redirect(`/${pollURL}`); //polls.id
-=======
     //insert to database
     res.redirect(`/${pollURL}`); //polls.id
->>>>>>> 69eb898945462269ab52a492c0673d9df9b00af0
   });
 
   // UPDATE Polls
@@ -159,24 +155,11 @@ module.exports = db => {
   // GET polls/randomURL (generated polls page)
   router.get("/:pollURL", (req, res) => {
     checkIfPollIdExists(req.params.pollURL)
-<<<<<<< HEAD
-    .then((exists) => {
-      if (exists) {
-
-        getTableDataByRow(req.params.pollURL)
-        .then(tableData => {
-          console.log(tableData, '<--- tableData again');
-
-
-
-          res.render("show");
-=======
       .then(exists => {
         if (exists) {
           queryForPollOptions(req.params.pollURL).then(results => {
             //console.log("THIS IS RESPONSE AFTER PROMISE", res);
             res.render("show", { polls: results });
->>>>>>> 69eb898945462269ab52a492c0673d9df9b00af0
           });
           //getTableDataByRow(req.params.pollURL)
           // .then(tableData => {
