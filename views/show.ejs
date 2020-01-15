@@ -39,7 +39,7 @@
         </span>
       </div>
 
-      <form method ="POST" actions="/submit">
+      <form method ="POST" action="/polls/submit">
         <div class="form-row" id="submitter_input">
           <div class="form-group col-md-6">
             <label for="submitter_name">Name</label>
@@ -56,40 +56,18 @@
         <label for="poll_option">Select times best for you: </label>
         <div name="poll_option">
 
-          <% for(let timeOption in dateTime) { %>
-            <% const index = 0; %>
+          <% let index = 0; %>
+          <% for(let poll of polls) { %>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="" id="poll_option<%= index %>" name="poll_option<%= index %>">
+              <input class="form-check-input" type="checkbox" value="" id="<%= poll.id %>" name="poll_option<%= index %>">
               <label class="form-check-label" for="poll_option<%= index %>">
-                <%= timeOption[0] %>    <%= timeOption[1] %>
+                <%= poll.date_option %>    <%= poll.time_option %>
               </label>
             </div>
+            <% index++; %>
           <% } %>
 
-          <!-- <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="poll_option1" name="poll_option1">
-            <label class="form-check-label" for="poll_option1">
-              2020/01/15    15:30
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="poll_option2" name="poll_option2">
-            <label class="form-check-label" for="poll_option2">
-              2020/01/15    15:31
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="poll_option3" name="poll_option3">
-            <label class="form-check-label" for="poll_option3">
-              2020/01/15    15:32
-            </label>
-          </div> -->
-
-
         </div>
-
-
-
 
         <div class="container mt-100">
           <div class="row">
