@@ -15,12 +15,8 @@ db.connect();
 // Helper Functions --------------------------------------------------------------------
 
 //Pass the number of characters you'd like to produce as a random string
-const generateRandomString = length => {
-  return Math.round(
-    Math.pow(36, length + 1) - Math.random() * Math.pow(36, length)
-  )
-    .toString(36)
-    .slice(1);
+const generateRandomString = (length) => {
+  return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
 };
 
 // Add polls by inserting a new poll into database -- CURRENTLY does not post options to poll_options table
