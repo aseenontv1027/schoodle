@@ -104,9 +104,10 @@ const getTime = dateTime => {
 //Get poll options
 const queryForPollOptions = pollId => {
   const pollOptionsQuery = `SELECT poll_id, date_option, time_option, poll_options.id as id, polls.title as title, polls.description as description
- FROM poll_options
- JOIN polls ON polls.id = poll_id
- WHERE poll_id = $1;`;
+  FROM poll_options
+  JOIN polls ON polls.id = poll_id
+  WHERE poll_id = $1;`;
+
   return db.query(pollOptionsQuery, [pollId]).then(res => {
     return res.rows;
   });
@@ -130,23 +131,6 @@ const parsePollOptionIdOnSubmission = submissionData => {
   return indexReturn[0];
 };
 
-//PROBABLY DON'T NEED THESE CREATED A FUNCTION THAT REMOVES submitter_name & submitter_email from the body input
-// //Filters an Object for poll_option.id #'s
-// const filterPollOptionIdsOnSubmission = submissionData => {
-//   const keyValuesArr = Object.keys(submissionData);
-//   const returnArr = keyValuesArr.filter(arr => arr !== 'submitter_name' && arr !== 'submitter_email');
-//   return returnArr;
-// };
-
-// //Filters an Object for Submission Response Values
-// const filterSubmissionResponses = submissionData => {
-//   const objValuesArr = Object.values(submissionData);
-//   console.log('objValuesArr', objValuesArr);
-//   const returnArr = objValuesArr.filter(arr => arr === true && arr === false);
-//   console.log('filtered values array:', returnArr);
-//   return returnArr;
-// }
-
 //Removed submitter_name & submitter_email from submission object
 const removeNameEmail = submissionObj => {
   delete submissionObj['submitter_name'] && delete submissionObj['submitter_email']
@@ -156,27 +140,10 @@ const removeNameEmail = submissionObj => {
 const addSubmission = async data => {
 
   const pollOptionId = parsePollOptionIdOnSubmission(data);
-  // console.log('pollOptionId DATA:', pollOptionId);
 
   const pollOptionIdBoolean = removeNameEmail(data);
-  // console.log('No Name No Email Obj:', pollOptionIdBoolean);
 
   const pollId = await getPollIdFromPollOptionId(pollOptionId);
-  //console.log('DATA GOING INTO addSubmission', data);
-
-  // //This returns an ARRAY
-  // const filteredPollOptionIds = filterPollOptionIdsOnSubmission(data);
-  // console.log('filteredPollOptionIds', filteredPollOptionIds);
-
-  // //This returns an ARRAY
-  // const filteredSubmissionResponses = filterSubmissionResponses(data);
-  // console.log('filteredSubmissionResponses', filteredSubmissionResponses);
-
-  // const pollId = 4;
-  /*{ '4': 'true',
- '8': 'true',
- submitter_name: 'Darren Beattie',
- submitter_email: 'darren.beattie@gmail.com' }*/
 
   const dataValues = [
       pollId,
@@ -192,44 +159,38 @@ const addSubmission = async data => {
 
   return db.query(dataQuery, dataValues)
     .then(response=> {
-      // console.log('RES ROWS WAY DOWN THE FUNCTION:', response.rows);
-      //console.log('pollOptionIdBoolean', pollOptionIdBoolean);
 
-      // let timeQuery = "";
+      let submissionResponseQuery = "";
 
-      // let timeQueryStart = `
-      //   INSERT INTO submission_responses (poll_option_id, submission_id, submission_response)
-      //   VALUES `;
+      const submissionResponseStart = `
+        INSERT INTO submission_responses (poll_option_id, submission_id, submission_response)
+        VALUES `;
+
+      const submissionResponseEnd =  `
+        ;`
+        // ON CONFLICT (submission_id, poll_option_id)
+        // DO UPDATE SET submission_response = EXCLUDED.submission_response;`
+
+      submissionResponseQuery += submissionResponseStart;
 
       const booleanSubmissionLoop = (submissionResponses, pollId) => {
+        let returnStr = ``
         for (const id in submissionResponses) {
-          console.log(`'${id}', '${response.rows[0].id}', '${submissionResponses[id]}'`)
+          returnStr += `('${id}', '${pollId[0].id}', '${submissionResponses[id]}'),`
         }
+        console.log('returnStr',returnStr);
+        return returnStr.slice(0, -1);
       }
 
-      booleanSubmissionLoop(pollOptionIdBoolean, response.rows);
+      submissionResponseQuery += booleanSubmissionLoop(pollOptionIdBoolean, response.rows);
 
-      // const timeQueryLoop = counter => {
-      // let queryLoop = `
-      // ('${poll_options.id}', '${res.rows[0].id}', '${submission_responses}')
-      // `;
-      // return queryLoop;
-      // };
+      submissionResponseQuery += submissionResponseEnd;
 
-      // timeQuery = timeQuery + timeQueryStart;
+      console.log('submissionResponseQuery', submissionResponseQuery);
 
-      // for (let i = 0; i < lengthOfTime; i++) {
-      //   if (i === lengthOfTime - 1) {
-      //   timeQuery = timeQuery + timeQueryLoop(i);
-      //   } else {
-      //   timeQuery = timeQuery + timeQueryLoop(i) + ", ";
-      //   }
-      // }
-
-      // timeQuery = timeQuery + "RETURNING poll_id;";
-
-      return db.query(timeQuery).then(res => {
-        return res.rows;
+      return db.query(submissionResponseQuery).then(res => {
+        // console.log('res.rows AFTER QUERY:', res.rows);
+        return res;
       });
     });
 };
@@ -254,12 +215,12 @@ module.exports = db => {
   router.post("/:pollURL/submit", (req, res) => {
     addSubmission({ ...req.body })
       .then(submission => {
-        console.log(submission, '<-- THIS IS addSubmission RETURN'); //find out the structure of req.body
+        // console.log('addSubmission PROMISE RETURN:', submission); //find out the structure of req.body
         res.redirect(`/polls/${req.params.pollURL}`);
       })
       .catch(e => {
-              console.error(e);
-              res.send(e);
+        console.error(e);
+        res.send(e);
     });
   });
 
@@ -296,6 +257,7 @@ module.exports = db => {
           queryForPollOptions(req.params.pollURL).then(results => {
             res.render("show", { polls: results, pollURL: req.params.pollURL });
           });
+          //NOT USING THIS YET??
           //getTableDataByRow(req.params.pollURL)
           // .then(tableData => {
           // //console.log(tableData, '<--- tableData again');

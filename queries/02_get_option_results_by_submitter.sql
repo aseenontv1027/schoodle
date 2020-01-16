@@ -21,3 +21,9 @@ INSERT INTO submission_responses(submission_id, poll_option_id, submission_respo
 VALUES(1,1,false)
 ON CONFLICT (submission_id, poll_option_id)
 DO UPDATE SET submission_response = EXCLUDED.submission_response;
+
+-- //MY CURRENT TEST VERSION:
+INSERT INTO submission_responses(submission_id, poll_option_id, submission_response)
+VALUES(1,1,false)
+ON CONFLICT ON CONSTRAINT (submission_id, poll_option_id)
+DO UPDATE SET submission_response;
