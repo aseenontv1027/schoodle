@@ -32,7 +32,7 @@
     <div class="card-body">
       <h5 class="card-title">Invite Poll Participants</h5>
       <div class="input-group">
-        <input type="text" class="form-control" value="/path/toPollId" placeholder="Some link path..." id="copy-input">
+        <input type="text" class="form-control" value="http://localhost:8080/polls/<%= polls[0].poll_id %>" placeholder="Some link path..." id="copy-input">
         <span class="input-group-btn">
           <button class="btn btn-secondary mb-2" type="button" id="copy-button" data-toggle="tooltip" data-placement="button" title="Copy to Clipboard">Copy
           </button>
@@ -60,7 +60,7 @@
           <% for(let poll of polls) { %>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" value="" id="<%= poll.id %>" name="<%= poll.id %>">
-              <label class="form-check-label" for="poll_option<%= index %>">
+              <label class="form-check-label" for="<%= poll.id %>">
                 <%= poll.date_option %>    <%= poll.time_option %>
                 <!-- <input type="hidden" id="custId" name="custId" value="<%= %>"> -->
 
@@ -76,8 +76,8 @@
           <div class="col-md-12">
           <div class="card">
             <div class="card-header">
-                <h5>Edit row with Click</h5>
-                <span>Click on row to perform edit action then Click 'Submit' to save</span>
+                <h5><%= polls[0].title %></h5>
+                <span><%= polls[0].description %></span>
             </div>
           <div class="card-block">
           <div class="table-responsive">
@@ -86,9 +86,16 @@
                 <tr>
                   <th style="display: none;">#</th>
                   <th>Name</th>
-                  <th>Date/Time1</th>
-                  <th>Date/Time2</th>
-                  <th>Date/Time3</th>
+                  <% for(let poll of polls) { %>
+                    <th>
+                      <div>
+                        <%= poll.date_option %>
+                      </div>
+                      <div>
+                        <%= poll.time_option %>
+                      </div>
+                    </th>
+                  <% } %>
                 </tr>
               </thead>
 
