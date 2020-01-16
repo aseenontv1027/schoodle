@@ -19,7 +19,7 @@ const generateRandomString = (length) => {
   return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
 };
 
-// Add polls by inserting a new poll into database -- CURRENTLY does not post options to poll_options table
+// Add polls by inserting a new poll into database
 const addPoll = data => {
   let pollURL = generateRandomString(16);
   const dataValues = [
@@ -36,8 +36,6 @@ const addPoll = data => {
   (id, title, description, creator_name, creator_email)
   VALUES ($1,$2,$3,$4,$5)
   RETURNING * ;`;
-
-  // console.log(dataQuery);
 
   return db.query(dataQuery, dataValues).then(res => {
     let timeQuery = "";
@@ -64,26 +62,25 @@ const addPoll = data => {
 
     timeQuery = timeQuery + "RETURNING poll_id;";
     return db.query(timeQuery).then(res => {
-      //console.log("TTTTThis is ", res);
       return res.rows;
     });
   });
 };
 
-// Returns the whole table data in an array
-const getTableDataByRow = function(url) {
-  const dataQuery = `SELECT submissions.submitter_name as name, poll_options.date_option as date, poll_options.time_option as time, submission_responses.submission_response as true_false
-  FROM polls
-  JOIN poll_options ON polls.id = poll_id
-  JOIN submission_responses ON poll_option_id = poll_options.id
-  JOIN submissions ON submission_id = submissions.id
-  WHERE polls.id = $1;`;
+//STARTED BUT NOT FINISHED/NEEDED??
+// // Returns the whole table data in an array
+// const getTableDataByRow = function(url) {
+//   const dataQuery = `SELECT submissions.submitter_name as name, poll_options.date_option as date, poll_options.time_option as time, submission_responses.submission_response as true_false
+//   FROM polls
+//   JOIN poll_options ON polls.id = poll_id
+//   JOIN submission_responses ON poll_option_id = poll_options.id
+//   JOIN submissions ON submission_id = submissions.id
+//   WHERE polls.id = $1;`;
 
-  return db.query(dataQuery, [url]).then(res => {
-    //console.log(res.rows, "<--- tableData values");
-    return res.rows;
-  });
-};
+//   return db.query(dataQuery, [url]).then(res => {
+//     return res.rows;
+//   });
+// };
 
 const checkIfPollIdExists = id => {
   const idQuery = ` SELECT id
@@ -103,27 +100,148 @@ const getTime = dateTime => {
   dateTimeArray = dateTime.split("T");
   return dateTimeArray[1];
 };
-//get poll options
+
+//Get poll options
 const queryForPollOptions = pollId => {
   const pollOptionsQuery = `SELECT poll_id, date_option, time_option, poll_options.id as id, polls.title as title, polls.description as description
  FROM poll_options
  JOIN polls ON polls.id = poll_id
  WHERE poll_id = $1;`;
   return db.query(pollOptionsQuery, [pollId]).then(res => {
-    //console.log("WHAT IS RES?", res.rows);
     return res.rows;
   });
 };
 
+//Query database for PollId based on PollOptionId info
+const getPollIdFromPollOptionId = pollOptionId => {
+  const pollIdQuery = `
+ SELECT poll_id FROM poll_options
+ WHERE id = $1;`
+  return db.query(pollIdQuery, [pollOptionId])
+.then(answer => {
+      return answer.rows[0].poll_id;
+});
+};
+
+//Returns a poll_option.id to find a poll.id, see getPollIdFromPollOptionId
+const parsePollOptionIdOnSubmission = submissionData => {
+  let indexReturn = Object.keys(submissionData);
+  //This works only IF a poll_option.id is passed
+  return indexReturn[0];
+};
+
+//PROBABLY DON'T NEED THESE CREATED A FUNCTION THAT REMOVES submitter_name & submitter_email from the body input
+// //Filters an Object for poll_option.id #'s
+// const filterPollOptionIdsOnSubmission = submissionData => {
+//   const keyValuesArr = Object.keys(submissionData);
+//   const returnArr = keyValuesArr.filter(arr => arr !== 'submitter_name' && arr !== 'submitter_email');
+//   return returnArr;
+// };
+
+// //Filters an Object for Submission Response Values
+// const filterSubmissionResponses = submissionData => {
+//   const objValuesArr = Object.values(submissionData);
+//   console.log('objValuesArr', objValuesArr);
+//   const returnArr = objValuesArr.filter(arr => arr === true && arr === false);
+//   console.log('filtered values array:', returnArr);
+//   return returnArr;
+// }
+
+//Removed submitter_name & submitter_email from submission object
+const removeNameEmail = submissionObj => {
+  delete submissionObj['submitter_name'] && delete submissionObj['submitter_email']
+  return submissionObj;
+}
+
+const addSubmission = async data => {
+
+  const pollOptionId = parsePollOptionIdOnSubmission(data);
+  // console.log('pollOptionId DATA:', pollOptionId);
+
+  const pollOptionIdBoolean = removeNameEmail(data);
+  // console.log('No Name No Email Obj:', pollOptionIdBoolean);
+
+  const pollId = await getPollIdFromPollOptionId(pollOptionId);
+  //console.log('DATA GOING INTO addSubmission', data);
+
+  // //This returns an ARRAY
+  // const filteredPollOptionIds = filterPollOptionIdsOnSubmission(data);
+  // console.log('filteredPollOptionIds', filteredPollOptionIds);
+
+  // //This returns an ARRAY
+  // const filteredSubmissionResponses = filterSubmissionResponses(data);
+  // console.log('filteredSubmissionResponses', filteredSubmissionResponses);
+
+  // const pollId = 4;
+  /*{ '4': 'true',
+ '8': 'true',
+ submitter_name: 'Darren Beattie',
+ submitter_email: 'darren.beattie@gmail.com' }*/
+
+  const dataValues = [
+      pollId,
+      data.submitter_name,
+      data.submitter_email
+  ];
+
+  // this submission needs a poll_id
+  let dataQuery = `
+    INSERT INTO submissions (poll_id, submitter_name, submitter_email)
+    VALUES ($1,$2,$3)
+    RETURNING * ;`;
+
+  return db.query(dataQuery, dataValues)
+    .then(response=> {
+      // console.log('RES ROWS WAY DOWN THE FUNCTION:', response.rows);
+      //console.log('pollOptionIdBoolean', pollOptionIdBoolean);
+
+      // let timeQuery = "";
+
+      // let timeQueryStart = `
+      //   INSERT INTO submission_responses (poll_option_id, submission_id, submission_response)
+      //   VALUES `;
+
+      const booleanSubmissionLoop = (submissionResponses, pollId) => {
+        for (const id in submissionResponses) {
+          console.log(`'${id}', '${response.rows[0].id}', '${submissionResponses[id]}'`)
+        }
+      }
+
+      booleanSubmissionLoop(pollOptionIdBoolean, response.rows);
+
+      // const timeQueryLoop = counter => {
+      // let queryLoop = `
+      // ('${poll_options.id}', '${res.rows[0].id}', '${submission_responses}')
+      // `;
+      // return queryLoop;
+      // };
+
+      // timeQuery = timeQuery + timeQueryStart;
+
+      // for (let i = 0; i < lengthOfTime; i++) {
+      //   if (i === lengthOfTime - 1) {
+      //   timeQuery = timeQuery + timeQueryLoop(i);
+      //   } else {
+      //   timeQuery = timeQuery + timeQueryLoop(i) + ", ";
+      //   }
+      // }
+
+      // timeQuery = timeQuery + "RETURNING poll_id;";
+
+      return db.query(timeQuery).then(res => {
+        return res.rows;
+      });
+    });
+};
+
+
 // Routes -----------------------------------------------------------------------
 module.exports = db => {
-  // Create New Poll
+
+  // Create New Poll Route
   router.post("/", (req, res) => {
-    // Get poll data from form
     addPoll({ ...req.body })
       .then(poll => {
-        //console.log("Heyyyyyyyyyy", poll);
-
         res.redirect(`/polls/${poll[0].poll_id}`);
       })
       .catch(e => {
@@ -132,15 +250,28 @@ module.exports = db => {
       });
   });
 
-  // Submit response to poll
+  // Submit new response to poll
   router.post("/:pollURL/submit", (req, res) => {
-    //insert to database
-    // console.log(req.body, '<--- This is req.body broooooooooo'); //find out the structure of req.body
-    console.log(req.params.pollURL);
-
-    res.redirect(`/polls/${req.params.pollURL}`); //polls.id
-     //res.redirect('/polls/'+'polls'); //polls.id
+    addSubmission({ ...req.body })
+      .then(submission => {
+        console.log(submission, '<-- THIS IS addSubmission RETURN'); //find out the structure of req.body
+        res.redirect(`/polls/${req.params.pollURL}`);
+      })
+      .catch(e => {
+              console.error(e);
+              res.send(e);
+    });
   });
+
+  // // Submit response to poll
+  // router.post("/:pollURL/submit", (req, res) => {
+  //   //insert to database
+  //   // console.log(req.body, '<--- This is req.body broooooooooo'); //find out the structure of req.body
+  //   console.log(req.params.pollURL);
+
+  //   res.redirect(`/polls/${req.params.pollURL}`); //polls.id
+  //    //res.redirect('/polls/'+'polls'); //polls.id
+  // });
 
   // UPDATE Polls
   // router.post("/update", (req, res) => {
@@ -163,8 +294,6 @@ module.exports = db => {
       .then(exists => {
         if (exists) {
           queryForPollOptions(req.params.pollURL).then(results => {
-            //console.log("THIS IS RESPONSE AFTER PROMISE", res);
-            console.log(results, '<--- This is the results bruv')
             res.render("show", { polls: results, pollURL: req.params.pollURL });
           });
           //getTableDataByRow(req.params.pollURL)
