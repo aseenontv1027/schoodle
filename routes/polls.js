@@ -105,7 +105,7 @@ const getTime = dateTime => {
 };
 //get poll options
 const queryForPollOptions = pollId => {
-  const pollOptionsQuery = `SELECT poll_id, date_option, time_option
+  const pollOptionsQuery = `SELECT poll_id, date_option, time_option, id
  FROM poll_options
  WHERE poll_id = $1;`;
   return db.query(pollOptionsQuery, [pollId]).then(res => {
@@ -134,13 +134,20 @@ module.exports = db => {
   // Submit response to poll
   router.post("/submit", (req, res) => {
     //insert to database
-    res.redirect(`/${pollURL}`); //polls.id
+
+    console.log(req.body, '<--- This is req.body broooooooooo'); //find out the structure of req.body
+
+
+
+
+    res.redirect(`/`); //polls.id
+    // res.redirect(`/${pollURL}`); //polls.id
   });
 
   // UPDATE Polls
-  router.post("/update", (req, res) => {
-    res.redirect(`/${pollURL}`); //polls.id
-  });
+  // router.post("/update", (req, res) => {
+  //   res.redirect(`/${pollURL}`); //polls.id
+  // });
 
   // GET Polls (home route)
   router.get("/new", (req, res) => {
