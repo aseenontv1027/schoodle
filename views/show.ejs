@@ -28,7 +28,7 @@
 
   </header>
 
-  <div class="card">
+  <!-- <div class="card">
     <div class="card-body">
       <h5 class="card-title">Invite Poll Participants</h5>
       <div class="input-group">
@@ -37,9 +37,17 @@
           <button class="btn btn-secondary mb-2" type="button" id="copy-button" data-toggle="tooltip" data-placement="button" title="Copy to Clipboard">Copy
           </button>
         </span>
-      </div>
+      </div> -->
 
       <form method ="POST" action="/polls/submit">
+        <h5 class="card-title">Invite Poll Participants</h5>
+        <div class="input-group">
+        <input type="text" class="form-control" value="http://localhost:8080/polls/<%= polls[0].poll_id %>" placeholder="Some link path..." id="copy-input">
+        <span class="input-group-btn">
+          <button class="btn btn-secondary mb-2" type="button" id="copy-button" data-toggle="tooltip" data-placement="button" title="Copy to Clipboard">Copy
+          </button>
+        </span>
+        </div>
         <div class="form-row" id="submitter_input">
           <div class="form-group col-md-6">
             <label for="submitter_name">Name</label>

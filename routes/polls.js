@@ -166,8 +166,15 @@ module.exports = db => {
       .then(exists => {
         if (exists) {
           queryForPollOptions(req.params.pollURL).then(results => {
-            //console.log("THIS IS RESPONSE AFTER PROMISE", res);
+
+
+
+
             console.log(results, '<--- This is the results bruv')
+
+
+
+
             res.render("show", { polls: results });
           });
           //getTableDataByRow(req.params.pollURL)
