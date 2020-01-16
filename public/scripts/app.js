@@ -45,4 +45,13 @@ $(document).ready(function() {
       }
     });
 
+  $(".form-check-input").on('change', function() {
+    if ($(this).is(':checked')) {
+      $(this).attr('value', 'true');
+    } else {
+      $(this).attr('value', 'false');
+    }
+
+  });
+
 });

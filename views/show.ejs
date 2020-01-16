@@ -59,9 +59,11 @@
           <% let index = 0; %>
           <% for(let poll of polls) { %>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="" id="<%= poll.id %>" name="poll_option<%= index %>">
+              <input class="form-check-input" type="checkbox" value="" id="<%= poll.id %>" name="<%= poll.id %>">
               <label class="form-check-label" for="poll_option<%= index %>">
                 <%= poll.date_option %>    <%= poll.time_option %>
+                <!-- <input type="hidden" id="custId" name="custId" value="<%= %>"> -->
+
               </label>
             </div>
             <% index++; %>
