@@ -48,10 +48,13 @@ $(document).ready(function() {
   $(".form-check-input").on('change', function() {
     if ($(this).is(':checked')) {
       $(this).attr('value', 'true');
+      $('#'+$(this).attr('name')+'-hidden').attr("disabled", true);
     } else {
+      $('#'+$(this).attr('name')+'-hidden').attr("disabled", false);
       $(this).attr('value', 'false');
     }
-
   });
-
+  // $(".form-check-input").each(function() {
+  //     $(this).attr('value', 'false');
+  // });
 });
