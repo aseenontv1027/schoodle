@@ -105,8 +105,9 @@ const getTime = dateTime => {
 };
 //get poll options
 const queryForPollOptions = pollId => {
-  const pollOptionsQuery = `SELECT poll_id, date_option, time_option, id
+  const pollOptionsQuery = `SELECT poll_id, date_option, time_option, poll_options.id as id, polls.title as title, polls.description as description
  FROM poll_options
+ JOIN polls ON polls.id = poll_id
  WHERE poll_id = $1;`;
   return db.query(pollOptionsQuery, [pollId]).then(res => {
     //console.log("WHAT IS RES?", res.rows);
@@ -166,6 +167,7 @@ module.exports = db => {
         if (exists) {
           queryForPollOptions(req.params.pollURL).then(results => {
             //console.log("THIS IS RESPONSE AFTER PROMISE", res);
+            console.log(results, '<--- This is the results bruv')
             res.render("show", { polls: results });
           });
           //getTableDataByRow(req.params.pollURL)
