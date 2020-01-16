@@ -105,12 +105,28 @@ const getTime = dateTime => {
 };
 //get poll options
 const queryForPollOptions = pollId => {
-  const pollOptionsQuery = `SELECT poll_id, date_option, time_option, poll_options.id as id, polls.title as title, polls.description as description
- FROM poll_options
- JOIN polls ON polls.id = poll_id
- WHERE poll_id = $1;`;
+  const pollOptionsQuery = `SELECT poll_id, date_option, time_option, poll_options.id as id, polls.title as title, polls.description as description, polls.id as polls_id
+  FROM poll_options
+  JOIN polls ON polls.id = poll_id
+  WHERE poll_id = $1;`;
   return db.query(pollOptionsQuery, [pollId]).then(res => {
     //console.log("WHAT IS RES?", res.rows);
+    return res.rows;
+  });
+};
+
+// Retrieve submission data with given polls.id
+const queryForSubmissions = resultObj => {
+  const submissionQuery = `
+  SELECT submissions.id as id, submissions.poll_id as poll_id, submissions.submitter_name as user_name, submission_responses.poll_option_id as poll_option_id, submission_responses.submission_response as boolean
+  FROM submissions
+  JOIN submission_responses ON submission_id = submissions.id
+  WHERE poll_id = $1;`;
+
+  console.log([resultObj[0].polls_id]);
+
+  return db.query(submissionQuery, ['1']).then(res => {
+    console.log(res.rows, '<--------- This is res.rows in submissionQuery');
     return res.rows;
   });
 };
@@ -167,21 +183,36 @@ module.exports = db => {
         if (exists) {
           queryForPollOptions(req.params.pollURL).then(results => {
 
+            console.log(results, '<--- This is the results bruv');
 
+            queryForSubmissions(results).then(tableArr => {
 
+              console.log(tableArr, '<---------------- talbeArr');
 
-            console.log(results, '<--- This is the results bruv')
+              const total ={};
 
+              tableArr.forEach(responseData => {
+                let key = responseData.poll_option_id;
+                if (key in total) {
+                  if (responseData.boolean) {
+                    total[key]++;
+                  }
+                } else {
+                  if (responseData.boolean) {
+                    total[key] = 1;
+                  } else {
+                    total[key] = 0;
+                  }
+                }
+              });
 
+              console.log(total, '<---------- This is total')
 
+              res.render("show", { polls: results, table: tableArr, countTotal: total});
 
-            res.render("show", { polls: results });
+            });
+
           });
-          //getTableDataByRow(req.params.pollURL)
-          // .then(tableData => {
-          // //console.log(tableData, '<--- tableData again');
-          // res.render("show");
-          // });
         } else {
           res.redirect("/polls/new");
           return null;
