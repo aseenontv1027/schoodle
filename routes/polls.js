@@ -133,16 +133,13 @@ module.exports = db => {
   });
 
   // Submit response to poll
-  router.post("/submit", (req, res) => {
+  router.post("/:pollURL/submit", (req, res) => {
     //insert to database
+    // console.log(req.body, '<--- This is req.body broooooooooo'); //find out the structure of req.body
+    console.log(req.params.pollURL);
 
-    console.log(req.body, '<--- This is req.body broooooooooo'); //find out the structure of req.body
-
-
-
-
-    res.redirect(`/`); //polls.id
-    // res.redirect(`/${pollURL}`); //polls.id
+    res.redirect(`/polls/${req.params.pollURL}`); //polls.id
+     //res.redirect('/polls/'+'polls'); //polls.id
   });
 
   // UPDATE Polls
@@ -168,7 +165,7 @@ module.exports = db => {
           queryForPollOptions(req.params.pollURL).then(results => {
             //console.log("THIS IS RESPONSE AFTER PROMISE", res);
             console.log(results, '<--- This is the results bruv')
-            res.render("show", { polls: results });
+            res.render("show", { polls: results, pollURL: req.params.pollURL });
           });
           //getTableDataByRow(req.params.pollURL)
           // .then(tableData => {
