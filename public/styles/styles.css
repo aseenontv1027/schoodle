@@ -1,0 +1,24 @@
+body {
+  background-color: #EEE;
+}
+body h1 {
+  color: #244751;
+}
+header {
+  background-color: #4381C1;
+}
+body {
+  background-color: lightgray;
+}
+.nav-link {
+  color: white;
+}
+.btn-primary {
+  margin-top: 1em;
+}
+.input_time {
+  margin-top: 0.5em;
+}
+#time_input_box {
+  margin-bottom: 0;
+}
