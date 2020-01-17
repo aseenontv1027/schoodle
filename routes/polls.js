@@ -119,7 +119,7 @@ const getPollIdFromPollOptionId = pollOptionId => {
  SELECT poll_id FROM poll_options
  WHERE id = $1;`
   return db.query(pollIdQuery, [pollOptionId])
-.then(answer => {
+    .then(answer => {
       return answer.rows[0].poll_id;
 });
 };
@@ -137,7 +137,26 @@ const removeNameEmail = submissionObj => {
   return submissionObj;
 }
 
+//HELPER FOR SORTING TRUE OR FALSE VALUES ASSOCIATED WITH A POLL_OPTION_ID
+const trueOrFalse = (obj) => {
+  const objKeyArr = Object.keys(obj);
+  let falseString = '';
+  let trueString = '';
+  for (const id of objKeyArr) {
+    if (obj[id] === 'true') {
+      trueString += `'${id}',`;
+    } else {
+      falseString += `'${id}',`;
+    }
+  }
+  return [trueString.slice(0, -1), falseString.slice(0, -1)];
+};
+
 const addSubmission = async data => {
+
+  // console.log('DATA:', data)
+  const submitterName = data.submitter_name;
+  const submitterEmail = data.submitter_email;
 
   const pollOptionId = parsePollOptionIdOnSubmission(data);
 
@@ -145,53 +164,153 @@ const addSubmission = async data => {
 
   const pollId = await getPollIdFromPollOptionId(pollOptionId);
 
-  const dataValues = [
+  const pollIDSubmitterValues = [
       pollId,
-      data.submitter_name,
-      data.submitter_email
+      submitterEmail
   ];
 
-  // this submission needs a poll_id
-  let dataQuery = `
-    INSERT INTO submissions (poll_id, submitter_name, submitter_email)
-    VALUES ($1,$2,$3)
-    RETURNING * ;`;
+  // console.log('DATA QUERY ARRAY', pollIDSubmitterValues);
 
-  return db.query(dataQuery, dataValues)
-    .then(response=> {
+  const pollIdSubmitterNameQuery = `
+    SELECT * FROM submissions
+    WHERE poll_id = $1 AND submitter_email = $2;`;
 
-      let submissionResponseQuery = "";
+  return db.query(pollIdSubmitterNameQuery, pollIDSubmitterValues)
+    .then(check => {
 
-      const submissionResponseStart = `
-        INSERT INTO submission_responses (poll_option_id, submission_id, submission_response)
-        VALUES `;
+      //console.log('CHECK.ROWS[0].ID RETURNS:', check.rows[0].id);
+      //console.log('SUBMISSIONID', submissionId);
+      console.log('<SHOULD BE TRUE IF I ENTER darren.beattie@gmail.com --->', (check.rows.length > 0));
 
-      const submissionResponseEnd =  `
-        ;`
-        // ON CONFLICT (submission_id, poll_option_id)
-        // DO UPDATE SET submission_response = EXCLUDED.submission_response;`
+      if (check.rows.length > 0) {
 
-      submissionResponseQuery += submissionResponseStart;
+        const submissionId = check.rows[0].id;
+        console.log('IS THE TRUE INDEX FULL?', trueOrFalse(pollOptionIdBoolean)[0] !== '');
 
-      const booleanSubmissionLoop = (submissionResponses, pollId) => {
-        let returnStr = ``
-        for (const id in submissionResponses) {
-          returnStr += `('${id}', '${pollId[0].id}', '${submissionResponses[id]}'),`
-        }
-        console.log('returnStr',returnStr);
-        return returnStr.slice(0, -1);
-      }
+        if (trueOrFalse(pollOptionIdBoolean)[0] !== '') {
 
-      submissionResponseQuery += booleanSubmissionLoop(pollOptionIdBoolean, response.rows);
+          //submissionId //
+          //pollOptionIdBoolean //Obj with key = poll_option_id and value = true or false
 
-      submissionResponseQuery += submissionResponseEnd;
+          // console.log('HOW DOES TRUE OR FALSE FUNCTION RETURN?', trueOrFalse(pollOptionIdBoolean));
+          console.log('SubmissionValues', submissionId);
 
-      console.log('submissionResponseQuery', submissionResponseQuery);
+          const updateQueryStartTrue = `
+            UPDATE submission_responses
+            SET submission_response = true
+            WHERE submission_id = ${submissionId} AND poll_option_id IN (${trueOrFalse(pollOptionIdBoolean)[0]})
+            RETURNING *;`
 
-      return db.query(submissionResponseQuery).then(res => {
-        // console.log('res.rows AFTER QUERY:', res.rows);
-        return res;
-      });
+          console.log('updateQueryStartTrue AFTER:', updateQueryStartTrue);
+
+          return db.query(updateQueryStartTrue)
+            .then(result => {
+
+              console.log('IF THERE ARE TRUE VALUES RESULT', result.rows);
+              if ((trueOrFalse(pollOptionIdBoolean)[1] !== '')) {
+
+                console.log('RESULT.ROWS:', result.rows);
+                console.log('pollOptionIdBoolean', pollOptionIdBoolean);
+                const updateQueryStartFalse = `
+                  UPDATE submission_responses
+                  SET submission_response = false
+                  WHERE submission_id = ${submissionId} AND poll_option_id IN (${trueOrFalse(pollOptionIdBoolean)[1]})
+                  RETURNING *;`
+
+              return db.query(updateQueryStartFalse)
+                .then(result => {
+                  return result;
+                });
+
+              } else {
+                console.log('LAST ELSE STATEMENT RESULT:', result.rows);
+                return db.query(result.rows)
+                .then(lastResult => {
+                  return lastResult;
+                });
+                // return db.query(updateQueryStartFalse)
+                // .then(result => {
+                //   return result;
+                // });
+              }
+
+            });
+
+          } else {
+
+            const updateQueryStartFalse = `
+                UPDATE submission_responses
+                SET submission_response = false
+                WHERE submission_id = ${submissionId} AND poll_option_id IN (${trueOrFalse(pollOptionIdBoolean)[1]});`
+
+            console.log('updateQueryStartFalse AFTER:', updateQueryStartFalse);
+
+            return db.query(updateQueryStartFalse)
+              .then(result => {
+                return result;
+              });
+          }
+
+      } else {
+
+        const insertSubmissionValues = [
+          pollId,
+          submitterName,
+          submitterEmail
+        ];
+
+        console.log('INSERT QUERY ARRAY', insertSubmissionValues);
+
+        let insertQuery = `
+          INSERT INTO submissions (poll_id, submitter_name, submitter_email)
+          VALUES ($1,$2,$3)
+          RETURNING * ;`;
+
+        return db.query(insertQuery, insertSubmissionValues)
+          .then(response => {
+
+            console.log('RESPONSE.ROWS:', response.rows)
+
+            // [ anonymous {
+            //   id: 96,
+            //   poll_id: '4',
+            //   submitter_name: 'Darren Beattie',
+            //   submitter_email: 'darren.beattie@wmail.com',
+            //   submission_time: null } ]
+
+            let submissionResponseQuery = "";
+
+            const submissionResponseStart = `
+              INSERT INTO submission_responses (poll_option_id, submission_id, submission_response)
+              VALUES `;
+
+            const submissionResponseEnd =  `
+              ;`
+              // ON CONFLICT (submission_id, poll_option_id)
+              // DO UPDATE SET submission_response = EXCLUDED.submission_response;`
+
+            submissionResponseQuery += submissionResponseStart;
+
+            const booleanSubmissionLoop = (submissionResponses, pollId) => {
+              let returnStr = ``
+              for (const id in submissionResponses) {
+                returnStr += `('${id}', '${pollId[0].id}', '${submissionResponses[id]}'),`
+              }
+              return returnStr.slice(0, -1);
+            }
+
+            submissionResponseQuery += booleanSubmissionLoop(pollOptionIdBoolean, response.rows);
+
+            submissionResponseQuery += submissionResponseEnd;
+
+            //console.log('submissionResponseQuery', submissionResponseQuery);
+
+            return db.query(submissionResponseQuery).then(response => {
+              // console.log('res.rows AFTER QUERY:', res.rows);
+              return response;
+            });
+        });
+      };
     });
 };
 
