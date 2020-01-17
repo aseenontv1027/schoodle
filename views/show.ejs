@@ -52,9 +52,9 @@
       <form method ="POST" action="/polls/<%= polls[0].poll_id %>/submit">
         <h5 class="card-title">Invite Poll Participants</h5>
         <div class="input-group" for="copy-input">
-         <input type="text" class="form-control" value="https://availibility-polling.herokuapp.com/polls/<%= polls[0].poll_id %>" placeholder="Some link path..." id="copy-input"> 
-        <!--<input type="text" class="form-control" value="http://localhost:8080/polls/<%= polls[0].poll_id %>" placeholder="Some link path..." id="copy-input">-->
-
+        <input type="text" class="form-control" value="https://availibility-polling.herokuapp.com/polls/<%= polls[0].poll_id %>" placeholder="Some link path..." id="copy-input">
+        <!-- <input type="text" class="form-control" value="http://localhost:8080/polls/<%= polls[0].poll_id %>" placeholder="Some link path..." id="copy-input"> -->
+        
 <span class="input-group-btn">
           <button class="btn btn-secondary mb-2" type="button" id="copy-button" data-toggle="tooltip" data-placement="button" title="Copy to Clipboard" onclick="myFunction()">Copy
           </button>
