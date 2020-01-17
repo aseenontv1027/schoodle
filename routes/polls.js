@@ -70,21 +70,6 @@ const addPoll = data => {
   });
 };
 
-// Returns the whole table data in an array
-const getTableDataByRow = function(url) {
-  const dataQuery = `SELECT submissions.submitter_name as name, poll_options.date_option as date, poll_options.time_option as time, submission_responses.submission_response as true_false
-  FROM polls
-  JOIN poll_options ON polls.id = poll_id
-  JOIN submission_responses ON poll_option_id = poll_options.id
-  JOIN submissions ON submission_id = submissions.id
-  WHERE polls.id = $1;`;
-
-  return db.query(dataQuery, [url]).then(res => {
-    //console.log(res.rows, "<--- tableData values");
-    return res.rows;
-  });
-};
-
 const checkIfPollIdExists = id => {
   const idQuery = ` SELECT id
     FROM polls
@@ -125,9 +110,129 @@ const queryForSubmissions = resultObj => {
 
   console.log([resultObj[0].polls_id]);
 
-  return db.query(submissionQuery, ['1']).then(res => {
+  return db.query(submissionQuery, [resultObj[0].polls_id]).then(res => {
     console.log(res.rows, '<--------- This is res.rows in submissionQuery');
     return res.rows;
+  });
+};
+
+const formatAMPM = function(date) {
+  console.log(typeof(date));
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  let strTime = hours + ':' + minutes + ' ' + ampm;
+  return strTime;
+};
+
+const checkEmailPerPoll = function(Obj) {
+  const queryWithURL = `
+  SELECT submissions.id as submission_id, submissions.poll_id as poll_id, submissions.submitter_name as name, submissions.submitter_email as email
+  FROM submissions
+  JOIN polls ON submissions.poll_id = polls.id
+  JOIN poll_options ON polls.id = poll_options.poll_id
+  WHERE polls.id = $1;`;
+
+  const insertInto = `
+  INSERT INTO submissions
+  (poll_id, submitter_name, submitter_email)
+  VALUES ($1,$2,$3)
+  RETURNING * ;`
+
+  const startInsertIntoResponse = `
+  INSERT INTO submission_responses
+  (submission_id, poll_option_id, submission_response)
+  VALUES
+  `;
+
+
+
+  let insertIntoResponse = '';
+
+  console.log(Obj, '<-- OBJJJJJJJJJJJJ');
+
+
+  return db.query(queryWithURL, [Obj.url]).then(res => {
+    console.log(res.rows, 'commmmmeeee on');
+    if (res.rows.length === 0) {
+      console.log('heheheyeyeyeyeeyeheheheheh');
+      return db.query(insertInto, [Obj.url, Obj.form.submitter_name, Obj.form.submitter_email]).then(
+          res => {
+            console.log(res.rows, 'asdfasdfasdfwowwowowowowowowowowowwwwwwwWWWWWWWWWWWWw')
+            const pollOptionArr = [];
+            const booleanArr = [];
+            const formKeyArr = Object.keys(Obj.form);
+            const formValueArr = Object.values(Obj.form);
+
+            formKeyArr.forEach(key => {
+              if (Number(key)) {
+                pollOptionArr.push(Number(key));
+              }
+            });
+
+            formValueArr.forEach(value => {
+              if (value === 'true' || value === 'false') {
+                booleanArr.push(value);
+              }
+            });
+
+            console.log(pollOptionArr, "pollOptionArr yo~");
+            console.log(booleanArr, "booleanArr yo~");
+
+            insertIntoResponse = insertIntoResponse + startInsertIntoResponse;
+
+            for (let i = 0; i < pollOptionArr.length; i++) {
+              insertIntoResponse = insertIntoResponse + `
+              (${res.rows[0].id},${pollOptionArr[i]},${booleanArr[i]})
+              `;
+              if (i === pollOptionArr.length - 1) {
+                insertIntoResponse = insertIntoResponse + 'RETURNING *;';
+              } else {
+                insertIntoResponse = insertIntoResponse + ', ';
+              }
+            }
+            return db.query(insertIntoResponse).then(res => {
+              console.log(res.rows, "insertion yoyoyoyoyoyoy");
+              return res.rows;
+            })
+        }
+      )
+    } else {
+      console.log('Nahhhhhhhhh');
+      return db.query(queryWithURL, [Obj.url]).then(res => {
+        console.log(res.rows, "Now we have something!");
+        for (submissionData of res.rows) {
+          if (submissionData.email === Obj.form.submitter_email) {
+
+
+
+
+            const update = `
+            UPDATE submission_responses
+            SET submission_response = true
+            WHERE submission_id =
+            `
+
+            return
+
+
+          } else {
+            //
+
+
+            res.redirect(`/`);
+          }
+        }
+
+      });
+
+
+
+    }
+
   });
 };
 
@@ -138,8 +243,6 @@ module.exports = db => {
     // Get poll data from form
     addPoll({ ...req.body })
       .then(poll => {
-        //console.log("Heyyyyyyyyyy", poll);
-
         res.redirect(`/polls/${poll[0].poll_id}`);
       })
       .catch(e => {
@@ -149,22 +252,23 @@ module.exports = db => {
   });
 
   // Submit response to poll
-  router.post("/submit", (req, res) => {
+  router.post("/:pollURL/submit", (req, res) => {
     //insert to database
 
     console.log(req.body, '<--- This is req.body broooooooooo'); //find out the structure of req.body
 
+    const url = req.params.pollURL;
+    const form = req.body;
+    const Obj = {};
+    Obj['url'] = url;
+    Obj['form'] = form;
 
-
-
-    res.redirect(`/`); //polls.id
-    // res.redirect(`/${pollURL}`); //polls.id
+    checkEmailPerPoll(Obj)
+    .then(a => {
+      console.log(a, 'asdfasdfasdfasdfasdfsd')
+      res.redirect(`/`);
+    })
   });
-
-  // UPDATE Polls
-  // router.post("/update", (req, res) => {
-  //   res.redirect(`/${pollURL}`); //polls.id
-  // });
 
   // GET Polls (home route)
   router.get("/new", (req, res) => {
@@ -189,8 +293,8 @@ module.exports = db => {
 
               console.log(tableArr, '<---------------- talbeArr');
 
+              // Get the total row data
               const total ={};
-
               tableArr.forEach(responseData => {
                 let key = responseData.poll_option_id;
                 if (key in total) {
@@ -208,8 +312,16 @@ module.exports = db => {
 
               console.log(total, '<---------- This is total')
 
-              res.render("show", { polls: results, table: tableArr, countTotal: total});
+              console.log(results, '<-----------resuuuuUlt');
 
+              // results.forEach(resultData => {
+              //   resultData.data_option = formatAMPM(resultData.data_option);
+              //   console.log(formatAMPM(resultData.data_option));
+              // })
+
+              // console.log(results, '<-----------resuuuuUlt');
+
+              res.render("show", { polls: results, table: tableArr, countTotal: total});
             });
 
           });
