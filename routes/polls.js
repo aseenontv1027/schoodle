@@ -99,33 +99,32 @@ const queryForPollOptions = pollId => {
   });
 };
 
-// <<<<<<< edit-route-to-render-table
-// // Retrieve submission data with given polls.id
-// const queryForSubmissions = resultObj => {
-//   const submissionQuery = `
-//   SELECT submissions.id as id, submissions.poll_id as poll_id, submissions.submitter_name as user_name, submission_responses.poll_option_id as poll_option_id, submission_responses.submission_response as boolean
-//   FROM submissions
-//   JOIN submission_responses ON submission_id = submissions.id
-//   WHERE poll_id = $1;`;
-//   console.log([resultObj[0].polls_id]);
+// Retrieve submission data with given polls.id
+const queryForSubmissions = resultObj => {
+  const submissionQuery = `
+  SELECT submissions.id as id, submissions.poll_id as poll_id, submissions.submitter_name as user_name, submission_responses.poll_option_id as poll_option_id, submission_responses.submission_response as boolean
+  FROM submissions
+  JOIN submission_responses ON submission_id = submissions.id
+  WHERE poll_id = $1;`;
+  console.log([resultObj[0].polls_id]);
 
-//   return db.query(submissionQuery, [resultObj[0].polls_id]).then(res => {
-//     console.log(res.rows, '<--------- This is res.rows in submissionQuery');
-//     return res.rows;
-//   });
-// };
+  return db.query(submissionQuery, [resultObj[0].polls_id]).then(res => {
+    console.log(res.rows, '<--------- This is res.rows in submissionQuery');
+    return res.rows;
+  });
+};
 
-// const formatAMPM = function(date) {
-//   console.log(typeof(date));
-//   let hours = date.getHours();
-//   let minutes = date.getMinutes();
-//   let ampm = hours >= 12 ? 'pm' : 'am';
-//   hours = hours % 12;
-//   hours = hours ? hours : 12; // the hour '0' should be '12'
-//   minutes = minutes < 10 ? '0'+minutes : minutes;
-//   let strTime = hours + ':' + minutes + ' ' + ampm;
-//   return strTime;
-// };
+const formatAMPM = function(date) {
+  console.log(typeof(date));
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  let strTime = hours + ':' + minutes + ' ' + ampm;
+  return strTime;
+};
 
 // const checkEmailPerPoll = function(Obj) {
 //   const queryWithURL = `
