@@ -9,7 +9,7 @@ $(document).ready(function() {
   let optionNum = 0;
 
   // input to add
-  const html = num => `<div><input type="datetime-local" name="option[${num}]" class="form-control" /></div>`;
+  const html = num => `<div class="input_time"><input type="datetime-local" name="option[${num}]" class="form-control" required/></div>`;
 
   // add on click
   $(add_button).click(function(e){
@@ -34,17 +34,6 @@ $(document).ready(function() {
       }
   });
 
-  $('#editable').Tabledit({
-    url: 'example.php',
-    editButton: false,
-    deleteButton: false,
-    hideIdentifier: true,
-    columns: {
-      identifier: [0, 'id'],
-      editable: [[2, 'name'], [3, 'option1'], [3, 'option2'], [4, 'option3']]
-      }
-    });
-
   $(".form-check-input").on('change', function() {
     if ($(this).is(':checked')) {
       $(this).attr('value', 'true');
@@ -54,7 +43,4 @@ $(document).ready(function() {
       $(this).attr('value', 'false');
     }
   });
-  // $(".form-check-input").each(function() {
-  //     $(this).attr('value', 'false');
-  // });
 });

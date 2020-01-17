@@ -5,12 +5,16 @@
 
   <link rel="stylesheet" href="/vendor/normalize-4.1.1.css" type="text/css" />
   <link rel="stylesheet" href="/vendor/border-box.css" type="text/css" />
-  <link rel="stylesheet" href="/styles/styles.css" type="text/css" />
 
   <script type="text/javascript" src="/vendor/jquery-3.0.0.js"></script>
   <script type="text/javascript" src="/scripts/app.js"></script>
-<!-- BootStrap -->
+  <!-- BootStrap -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <!-- Icons Javascripts to fetch icons -->
+  <script src="https://use.fontawesome.com/releases/v5.12.0/js/all.js" data-auto-replace-svg="nest"></script>
+
+  <link rel="stylesheet" href="/styles/layout.css" type="text/css" />
 
 </head>
 <body>
@@ -31,48 +35,39 @@
 
       <form method="POST" action="/polls">
         <div class="form-group">
-          <label for="formGroupExampleInput2">Poll Name *</label>
-          <input name="title" type="text" class="form-control" id="formGroupExampleInput2" placeholder="Name of Poll">
-          <!-- <small id="emailHelp" class="form-text text-muted">*</small> -->
+          <label for="title">Poll Name *</label>
+          <input name="title" type="text" class="form-control" id="title" placeholder="Name of Poll" required>
         </div>
 
         <div class="form-group">
-          <label for="formGroupExampleInput2">Description</label>
-          <input name="description" type="text" class="form-control" id="formGroupExampleInput2" placeholder="Optional">
+          <label for="description">Description</label>
+          <input name="description" type="text" class="form-control" id="description" placeholder="Optional">
           <small id="emailHelp" class="form-text text-muted">Optional</small>
         </div>
 
         <div class="form-group">
-          <label for="formGroupExampleInput2">Name *</label>
-          <input name="creator_name" type="text" class="form-control" id="formGroupExampleInput2" placeholder="First and Last">
+          <label for="creator_name">Name *</label>
+          <input name="creator_name" type="text" class="form-control" id="creator_name" placeholder="First and Last" required>
         </div>
 
         <div class="form-group">
-          <label for="exampleInputEmail1">Email address *</label>
-          <input type="email" name="creator_email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+          <label for="creator_email">Email address *</label>
+          <input type="email" name="creator_email" class="form-control" id="creator_email" aria-describedby="emailHelp" placeholder="Enter email" required>
           <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="time_input_box">
           <label for="date-options-field">Please Select Your Date Options *</label>
             <div class="input_fields_wrap">
-              <div><input type="datetime-local" name="option[0]" class="form-control" /></div>
+              <div class="input_time"><input type="datetime-local" name="option[0]" class="form-control" required/></div>
             </div>
           <small id="emailHelp" class="form-text text-muted">Click + to add options, - to remove them.</small>
         </div>
 
         <div>
-          <button type="button" class="add_field_button btn btn-primary">+</button>
-          <button type="button" class="remove_field_button btn btn-primary">-</button>
+          <button type="button" class="add_field_button btn btn-primary"><i class="fas fa-plus"></i></button>
+          <button type="button" class="remove_field_button btn btn-primary"><i class="fas fa-minus"></i></button>
         </div>
-
-        <!-- <div class="input_fields_wrap">
-          <label for="formGroupExampleInput2">Option 1</label>
-          <input name="options[0]" type="datetime-local" class="form-control" id="formGroupExampleInput2" placeholder="Add first option">
-          <button class="add_field_button btn btn-primary">+</button>
-          <div><input type="text" name="mytext[]"></div>
-        </div> -->
-
         <div><button type="submit" class="btn btn-primary">CREATE YOUR POLL</button></div>
       </form>
     </div>
