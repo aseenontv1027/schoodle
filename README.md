@@ -23,10 +23,15 @@ Schoodle is a useful scheduling and polling app which allows the user to create 
 Welcome to Schoodle!
 
 Give your meeting a title, a description, register your name and email, and pick your date & time options for the poll
+
 <img width="1440" alt="Screen Shot 2021-06-21 at 2 08 09 AM" src="https://user-images.githubusercontent.com/55459461/122715078-5b7e4180-d236-11eb-9bba-7a23f6dd9a6d.png">
+
 After created your meeting poll, you can choose to vote by entering your name and email. Or you can choose to vote later and send this poll to others by copying the unique url
+
 <img width="1440" alt="Screen Shot 2021-06-21 at 2 09 03 AM" src="https://user-images.githubusercontent.com/55459461/122715098-60db8c00-d236-11eb-9fa2-7279dde38fc6.png">
+
 The poll result is calculated in real-time
+
 <img width="1440" alt="Screen Shot 2021-06-21 at 2 11 47 AM" src="https://user-images.githubusercontent.com/55459461/122715113-6638d680-d236-11eb-83ea-c84c0d29123c.png">
 
 ## APIs and Tech Stack
